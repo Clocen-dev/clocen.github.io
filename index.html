@@ -3,484 +3,509 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>EXPLORIX® / RIASEC – Digitaler Fragebogen</title>
+  <title>RIASEC – Digitaler Fragebogen</title>
   <style>
     :root{
-      --bg:#0b0d10;           /* dunkles Thema */
-      --panel:#12161b;
-      --muted:#6b7280;
-      --text:#e5e7eb;
-      --accent:#60a5fa;       /* Blau */
-      --accent-2:#34d399;     /* Grün */
-      --accent-3:#f59e0b;     /* Orange */
-      --danger:#ef4444;
-      --card:#0f1318;
-      --ring:0 0 0 2px var(--accent) inset;
+      --bg:#0f172a;          /* slate-900 */
+      --panel:#111827;       /* gray-900 */
+      --muted:#94a3b8;       /* slate-400 */
+      --text:#e5e7eb;        /* gray-200 */
+      --brand:#22c55e;       /* green-500 */
+      --accent:#38bdf8;      /* sky-400 */
+      --danger:#ef4444;      /* red-500 */
+      --card:#0b1220;        /* deep */
+      --chip:#1f2937;        /* gray-800 */
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Inter,"Helvetica Neue",Arial; 
-      background:linear-gradient(180deg,#0b0d10,#0a0c0f 40%,#0b0d10);
+      margin:0; font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background:linear-gradient(120deg,var(--bg),#0b1220 60%,#0a1222);
       color:var(--text);
     }
-    .container{max-width:1100px; margin:32px auto; padding:0 16px 120px}
-    header{display:none}
-    header .bar{max-width:1100px; margin:auto; padding:14px 16px; display:flex; gap:12px; align-items:center; justify-content:space-between}
-    h1{font-size:clamp(20px,3vw,28px); margin:0; letter-spacing:.2px}
-    .pill{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; background:#111827; border:1px solid #1f2937; border-radius:8px; color:#cbd5e1; font-size:12px}
-    .small{font-size:12px; color:var(--muted)}
+    .wrap{max-width:980px;margin:40px auto;padding:24px}
+    header{display:flex;gap:16px;align-items:center;justify-content:space-between;margin-bottom:18px}
+    .title{font-size:clamp(22px,3vw,34px);font-weight:800;letter-spacing:.2px}
+    .subtitle{color:var(--muted)}
 
-    .grid{display:grid; grid-template-columns:1fr; gap:18px}
-    @media (min-width:960px){
-      .grid{grid-template-columns: 1fr}
-    }
+    .card{background:radial-gradient(1200px 300px at 20% -10%,rgba(34,197,94,.15),transparent 60%),
+                           radial-gradient(900px 400px at 120% -20%,rgba(56,189,248,.15),transparent 60%),
+                           linear-gradient(180deg,var(--panel),#0b1220);
+      border:1px solid #1f2937;border-radius:20px; padding:22px; box-shadow:0 10px 30px rgba(0,0,0,.35)}
 
-    .card{background:var(--panel); border:1px solid #1f2937; border-radius:16px; box-shadow:0 6px 24px rgba(0,0,0,.35)}
-    .card h2{margin:0 0 4px; font-size:20px}
-    .card header{position:unset; backdrop-filter:none; background:transparent; border:none}
-    .card .body{padding:18px}
+    .grid{display:grid;gap:14px}
+    @media (min-width:820px){.grid{grid-template-columns:1.2fr .8fr}}
 
-    .section{margin:14px 0 8px; border-top:1px dashed #273244; padding-top:14px}
-    .section h3{margin:0 0 12px; display:flex; align-items:center; gap:10px}
-    .badge{font-weight:700; letter-spacing:.6px; font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid #374151; background:#0f141c}
-    .R{--tag:#93c5fd} .I{--tag:#a7f3d0} .A{--tag:#fbcfe8} .S{--tag:#fde68a} .E{--tag:#c7d2fe} .C{--tag:#fca5a5}
-    .badge[data-type]{border-color:color-mix(in srgb, var(--tag), #374151 50%); background:color-mix(in srgb, var(--tag), #0b0d10 85%); color:#e5e7eb}
+    .progress{height:10px;background:#0b1220;border:1px solid #1f2937;border-radius:999px;overflow:hidden}
+    .progress>span{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--accent));transition:width .4s ease}
 
-    .tbl{width:100%; border-collapse:collapse; font-size:15px}
-    .tbl thead th{position:sticky; top:0; background:#0f1318; font-weight:600}
-    .tbl th,.tbl td{padding:10px 8px; border-bottom:1px dashed #243143; vertical-align:top}
-    .tbl th:first-child,.tbl td:first-child{padding-left:0}
-    .tbl td:last-child,.tbl th:last-child{padding-right:0}
-    .tbl .q{color:#d1d5db}
+    .chips{display:flex;gap:8px;flex-wrap:wrap;margin:.25rem 0 1rem}
+    .chip{padding:.28rem .6rem;border:1px solid #293548;background:var(--chip);border-radius:999px;color:var(--muted);font-size:.85rem}
 
-    .choice{display:flex; gap:10px; justify-content:flex-end; align-items:center}
-    .choice label{display:inline-flex; align-items:center; gap:6px; padding:6px 8px; border:1px solid #273244; background:#0d1219; border-radius:10px; cursor:pointer; user-select:none}
-    .choice input{appearance:none; width:16px; height:16px; border-radius:50%; border:1px solid #334155; display:inline-block; position:relative}
-    .choice input:checked{outline:var(--ring); box-shadow:0 0 0 3px rgba(96,165,250,.25)}
+    .section{margin-top:22px}
+    .section h2{margin:0 0 6px;font-size:1.1rem;letter-spacing:.3px}
+    .hint{color:var(--muted);font-size:.9rem}
 
-    .stack{display:flex; flex-direction:column; gap:10px}
+    .item{display:flex;align-items:start;gap:10px;justify-content:space-between;padding:10px 12px;border:1px solid #1f2937;background:#0b1220;border-radius:14px}
+    .item p{margin:0;max-width:72ch}
+    .item .actions{display:flex;gap:8px;white-space:nowrap}
+    button.small{font-size:.85rem;padding:.45rem .65rem;border-radius:10px;border:1px solid #243041;background:#101827;color:#e5e7eb;cursor:pointer}
+    button.small[data-choice="1"]{border-color:#1f6b3a}
+    button.small[data-choice="0"]{border-color:#6b1f1f}
+    button.small.active{background:linear-gradient(180deg,#111826,#0d1424);outline:2px solid var(--accent)}
 
-    .score{margin-top:18px} .hidden{display:none} 
-    .score .kpi{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; padding:10px 12px; border-radius:12px; background:#0d1318; border:1px solid #223042}
-    .barwrap{height:8px; background:#111827; border-radius:999px; overflow:hidden}
-    .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); transition:width .25s ease}
+    .pill{display:inline-grid;grid-auto-flow:column;gap:6px;border:1px solid #1f2937;background:#0b1220;border-radius:12px;padding:3px}
+    .pill button{padding:.42rem .7rem;border-radius:10px;border:none;color:#cbd5e1;background:transparent;cursor:pointer}
+    .pill button[aria-pressed="true"]{background:#12203a;color:#e2e8f0}
 
-    .buttons{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
-    button{background:var(--accent); color:#0b0d10; border:none; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer}
-    button.alt{background:#0f1318; color:#e5e7eb; border:1px solid #243143}
-    .result{display:block; margin-top:16px}
-    .bigCode{font-size:44px; font-weight:900; letter-spacing:6px; text-align:center; margin:6px 0 2px}
-    .codeBox{border:1px solid #243143; background:#0d1219; border-radius:14px; padding:14px}
-    .codeBox .sub{font-size:13px; color:#9ca3af; text-align:center}
-    .summaryGrid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px}
-    .summaryGrid .kpi{background:#0d1219}
-    .section-title{display:flex; align-items:center; gap:8px}
-    .section-title .num{width:28px; height:28px; display:inline-grid; place-items:center; border-radius:8px; background:#0d1219; border:1px solid #243143; font-weight:800}
-    .result .pill{justify-content:center; font-weight:800}
-    .warn{color:#fca5a5}
-    .footer{margin-top:24px; font-size:12px; color:#9ca3af}
-    .legend{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
-    .legend .badge{opacity:.9}
+    .footer-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px}
+    .btn{padding:.75rem 1rem;border-radius:12px;border:1px solid #214;
+      background:linear-gradient(180deg,#0c1a2e,#0a1422);color:#fff;font-weight:600;letter-spacing:.2px;cursor:pointer}
+    .btn.primary{background:linear-gradient(90deg,var(--brand),var(--accent));border:none;color:#05121c}
+    .btn.ghost{background:transparent;border:1px solid #1f2937;color:#cbd5e1}
 
-    /* print */
-    @media print{
-      header, .buttons, .footer{display:none}
-      body{background:#fff; color:#000}
-      .card, .score, .section{break-inside:avoid}
-    }
+    .result{display:none}
+    .bars{display:grid;gap:10px;margin-top:16px}
+    .bar{display:grid;grid-template-columns:60px 1fr;place-items:center start;gap:10px}
+    .bar .track{height:12px;background:#0b1220;border:1px solid #1f2937;border-radius:999px;overflow:hidden}
+    .bar .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--brand));transition:width .7s ease}
+
+    .codebox{display:flex;gap:10px;margin-top:10px}
+    .code{flex:1;text-align:center;padding:10px 12px;border-radius:14px;border:1px dashed #2a3850;background:#0b1220;font-size:1.2rem;font-weight:800}
+
+    details{border:1px solid #213045;background:#0b1220;border-radius:14px;padding:10px 12px}
+    summary{cursor:pointer;color:#cbd5e1}
+    .muted{color:var(--muted)}
+
+    .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:.9rem; background:#0b1220;border:1px solid #1f2937;border-radius:8px;padding:.15rem .35rem}
   </style>
 </head>
 <body>
-  
-
-  <div class="container grid">
-    <!-- LEFT: FORM -->
-    <div class="card">
-      <div class="body">
-        <h2>Kurz erklärt</h2>
-        <div class="nice-guide">
-          <ul style="margin:0 10px 8px 18px; line-height:1.7">
-            <li><strong>Pro Zeile genau eine Auswahl</strong> treffen.</li>
-            <li><em>Tätigkeiten</em>: <strong>gern</strong> oder <strong>ungern</strong>.</li>
-            <li><em>Fähigkeiten</em> &amp; <em>Berufe</em>: <strong>ja</strong> oder <strong>nein</strong>.</li>
-            <li>Am Ende auf <em>Auswertung anzeigen</em> klicken – dann siehst du Punkte &amp; Code.</li>
-          </ul>
-          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px">
-            <label class="pill" style="cursor:pointer">Länge:&nbsp;
-              <select id="lengthSelect" style="background:transparent; border:none; color:#e5e7eb">
-                <option value="standard">Standard</option>
-                <option value="short">Kurz</option>
-              </select>
-            </label>
-            <span class="pill" id="timePill">Dauer: <span id="timeEstimate">ca. 8–12 Min</span></span>
-          </div>
-          <p class="small" style="margin:8px 0 0">Datenschutz: Deine Eingaben bleiben auf diesem Gerät und werden nicht übertragen.</p>
-          <div class="legend" style="margin-top:10px">
-            <span class="badge R" data-type>R</span>
-            <span class="badge I" data-type>I</span>
-            <span class="badge A" data-type>A</span>
-            <span class="badge S" data-type>S</span>
-            <span class="badge E" data-type>E</span>
-            <span class="badge C" data-type>C</span>
-          </div>
-        </div>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="title">RIASEC – Digitaler Online‑Test</div>
+        <div class="subtitle">Basierend auf dem analogen Fragebogen (Tätigkeiten · Fähigkeiten · Berufe · Selbsteinschätzung). Wähle pro Zeile genau eine Option.</div>
       </div>
-    </div>
-    </div>
+      <div style="min-width:220px">
+        <div class="chips" id="legend"></div>
+        <div class="progress" aria-label="Fortschritt"><span id="progress"></span></div>
+      </div>
+    </header>
 
-    <!-- RIGHT: SCORE -->
-    
-
-    <!-- ====== FORM SECTIONS ====== -->
-    <section id="form" class="card" style="grid-column:1 / span 1">
-      <div class="body">
-        <h2 class="section-title"><span class="num">1</span> Tätigkeiten</h2>
-        <div id="sec-activities"></div>
-
-        <div class="section"><h2 class="section-title"><span class="num">2</span> Fähigkeiten</h2></div>
-        <div id="sec-skills"></div>
-
-        <div class="section"><h2 class="section-title"><span class="num">3</span> Berufe</h2></div>
-        <div id="sec-jobs"></div>
-
-        <div class="section" style="margin-top:20px">
-          <button type="button" id="showResults">Auswertung anzeigen</button>
+    <div class="grid">
+      <section class="card" id="formCard" aria-live="polite">
+        <div class="section">
+          <h2 id="sectionTitle">Lade Fragen…</h2>
+          <div class="hint" id="sectionHint"> </div>
         </div>
+        <div id="items" class="grid" style="grid-template-columns:1fr"></div>
+        <div class="footer-actions">
+          <button class="btn ghost" id="prevBtn" disabled>&larr; Zurück</button>
+          <button class="btn primary" id="nextBtn">Weiter</button>
+        </div>
+      </section>
+
+      <aside class="card">
+        <h3 style="margin-top:0">So funktioniert’s</h3>
+        <ol class="hint" style="margin-top:.2rem">
+          <li>Es gibt 4 Blöcke: <strong>Tätigkeiten</strong>, <strong>Fähigkeiten</strong>, <strong>Berufe</strong> und <strong>Selbsteinschätzung</strong>.</li>
+          <li>Jeder Block hat 6 Kategorien (R, I, A, S, E, C). R steht für <em>Realistic</em>, I für <em>Investigative</em>, A für <em>Artistic</em>, S für <em>Social</em>, E für <em>Enterprising</em>, C für <em>Conventional</em>.</li>
+          <li>Wähle zu jeder Aussage eine Option (gern/ungern oder ja/nein). Punkte zählen nur bei <em>gern</em>/<em>ja</em>.</li>
+          <li>Am Schluss erhältst du dein <strong>RIASEC‑Profil</strong> inkl. Drei‑Buchstaben‑Code.</li>
+        </ol>
+        <details style="margin-top:10px">
+          <summary>Keyboard‑Tipps</summary>
+          <p class="muted">Mit <span class="kbd">Tab</span> zwischen Aussagen springen, dann <span class="kbd">G</span> für „gern/ja“ und <span class="kbd">U</span> für „ungern/nein“ drücken.</p>
+        </details>
+      </aside>
+    </div>
+
+    <section id="result" class="card result" aria-live="polite">
+      <h2 style="margin-top:0">Auswertung</h2>
+      <p class="hint">Summen über alle 4 Blöcke hinweg. Punkte = Anzahl „gern/ja“.</p>
+      <div class="bars" id="bars"></div>
+      <div class="codebox">
+        <div class="code" id="code1" aria-label="Höchster Code">–</div>
+        <div class="code" id="code2" aria-label="Zweithöchster Code">–</div>
+        <div class="code" id="code3" aria-label="Dritthöchster Code">–</div>
+      </div>
+      <p class="hint" id="explain"></p>
+      <details>
+        <summary>Detailtabelle einblenden</summary>
+        <div id="detailTable" class="muted" style="overflow:auto;margin-top:8px"></div>
+      </details>
+      <div class="footer-actions">
+        <button class="btn ghost" id="restart">Neu starten</button>
+        <button class="btn" id="printBtn">Drucken / PDF</button>
       </div>
     </section>
 
-    <section id="scorePanel" class="card score hidden" style="grid-column:1 / span 1">
-      <div class="body">
-        <h2 class="section-title"><span class="num">✓</span> Auswertung</h2>
-        <div class="stack" id="scoreCards"></div>
-        <div class="result" id="result"></div>
-        <div class="buttons">
-          <button type="button" id="exportBtn">Antworten exportieren (JSON)</button>
-          <button type="button" class="alt" id="resetBtn">Zurücksetzen</button>
-          <button type="button" class="alt" onclick="window.print()">Drucken</button>
-        </div>
-        <p class="small footer">Hinweis: Die Darstellung dient der digitalen Erfassung und einer ersten Orientierung.</p>
-      </div>
-    </section>
   </div>
 
-  <script>
-    // --- Datensätze (aus den Fotos übertragen; bei Bedarf beliebig erweitern) ---
-    const DATA = {
-      activities: {
-        R: [
-          "elektrische Geräte installieren",
-          "mit Mechaniker/Techniker zusammenarbeiten",
-          "ein Fahrrad reparieren",
-          "Maschinen mit Motor bedienen",
-          "im Garten oder in der Landwirtschaft arbeiten",
-          "Metall oder Holz bearbeiten",
-        ],
-        I: [
-          "wissenschaftliche Artikel lesen",
-          "in einem Labor/Projekt arbeiten",
-          "ein Experiment durchführen",
-          "eine neue Programmiersprache lernen",
-          "über längere Zeit an Problemen arbeiten",
-          "einen wissenschaftlichen Bericht schreiben",
-        ],
-        A: [
-          "zeichnen oder gestalten",
-          "Musikinstrument spielen",
-          "Fotografieren/Porträts aufnehmen",
-          "eine Geschichte oder ein Theaterstück schreiben",
-          "vor Publikum auftreten",
-          "Prospekt/Poster grafisch gestalten",
-        ],
-        S: [
-          "bei einem gemeinnützigen Verein mitarbeiten",
-          "jemanden im Krankenhaus/Altersheim besuchen",
-          "über Beziehungsprobleme reden",
-          "Kindern bei den Schulaufgaben helfen",
-          "in einer Beratungsstelle arbeiten",
-          "andere medizinisch versorgen/pflegen",
-        ],
-        E: [
-          "Arbeit anderer anleiten/organisieren",
-          "Verantwortung für eine Gruppe übernehmen",
-          "ein eigenes Geschäft führen",
-          "als Organisations-/Unternehmensberater/in arbeiten",
-          "die Finanzierung einer Veranstaltung planen",
-          "an der Börse handeln oder verhandeln",
-        ],
-        C: [
-          "Buchhaltung/Tabellen führen",
-          "Daten in den Computer eingeben",
-          "Büromaschinen bedienen",
-          "Ordnungssystem für Dokumente entwerfen",
-          "Schreibarbeiten/Rechnungen prüfen",
-          "Formulare korrekt ausfüllen",
-        ],
-      },
-      skills: {
-        R: [
-          "ich kann Maschinen/Werkzeuge sicher bedienen",
-          "ich kann Möbel zusammenbauen/reparieren",
-          "ich kann einfache Elektrik‑Reparaturen ausführen",
-          "ich kann einen Fahrradschlauch wechseln",
-          "ich kann Holz bearbeiten",
-          "ich kann Wände tapezieren oder streichen",
-        ],
-        I: [
-          "ich kann mit Algebra/Mathe Probleme lösen",
-          "ich kann Experimente/Projekte durchführen",
-          "ich kann eine Funktion grafisch darstellen",
-          "ich verstehe einfache chemische Formeln",
-          "ich kann einen wissenschaftlichen Bericht schreiben",
-          "ich kenne Grundideen der Genetik/Physik",
-        ],
-        A: [
-          "ich kann ein Instrument spielen",
-          "ich kann in einem Theaterstück mitspielen",
-          "ich kann gut malen/gestalten",
-          "ich kann Texte oder Geschichten schreiben",
-          "ich kann gute Fotos machen",
-          "ich kann ansprechende Designs entwerfen",
-        ],
-        S: [
-          "ich komme leicht mit Menschen in Kontakt",
-          "ich kann geduldig unterrichten/erklären",
-          "ich kann mich gut einfühlen",
-          "ich kann mit Kindern gut umgehen",
-          "ich kann eine vertrauensvolle Atmosphäre schaffen",
-          "ich kann Menschen zuhause betreuen",
-        ],
-        E: [
-          "ich kann Gruppen motivieren",
-          "ich kann gut präsentieren",
-          "ich kann planen und organisieren",
-          "ich habe Führungsfähigkeiten",
-          "ich kann ein Geschäft führen",
-          "ich kann erfolgreich verhandeln",
-        ],
-        C: [
-          "ich kann Dokumente systematisch ordnen",
-          "ich kann viel Büroarbeit zügig erledigen",
-          "ich kann Text-/Tabellenprogramme sicher anwenden",
-          "ich kann Einnahmen/Ausgaben verbuchen",
-          "ich kann Formulare korrekt ausfüllen",
-          "ich halte mich zuverlässig an Vorschriften",
-        ],
-      },
-      jobs: {
-        R: ["Automechaniker/in","Elektriker/in","Zimmermann/Zimmerin","Metallbauer/in"],
-        I: ["Biologe/Biologielaborant/in","Software‑Entwickler/in","Historiker/in","Medizinische/r Laborant/in"],
-        A: ["Musiker/in","Fotograf/in","Grafiker/in","Modegestalter/in"],
-        S: ["Sozialarbeiter/in","Psychotherapeut/in","Kindergärtner/in","Berufsberater/in"],
-        E: ["Unternehmensberater/in","PR‑Verantwortliche/r","Verkaufsleiter/in","Manager/in"],
-        C: ["Buchhalter/in","Bankkassierer/in","Immobilien‑Verwalter/in","Sekretär/in"]
-      }
-    };
+<script>
+/********************************************
+ * RIASEC Online – Daten & Engine
+ ********************************************/
+// Kurztexte für Legende
+const LEGEND = {
+  R: 'Realistic – praktisch, handwerklich',
+  I: 'Investigative – forschend, analytisch',
+  A: 'Artistic – kreativ, gestaltend',
+  S: 'Social – sozial, helfend',
+  E: 'Enterprising – führend, verkaufend',
+  C: 'Conventional – ordnend, verwaltend'
+};
 
-    // --- Modus (Standard/Kurz) & Hilfsfunktionen ---
-    let MODE = 'standard'; // 'standard' oder 'short'
-    function activeData(){
-      // bei Kurzmodus reduzieren: 3 Akt./3 Skills/2 Jobs pro Typ
-      const aN = MODE==='short' ? 3 : undefined;
-      const sN = MODE==='short' ? 3 : undefined;
-      const jN = MODE==='short' ? 2 : undefined;
-      const pick = (arr,n)=> (n? arr.slice(0,n): arr.slice());
-      const out = {activities:{}, skills:{}, jobs:{}};
-      TYPES.forEach(t=>{
-        out.activities[t]=pick(DATA.activities[t], aN);
-        out.skills[t]=pick(DATA.skills[t], sN);
-        out.jobs[t]=pick(DATA.jobs[t], jN);
-      });
-      return out;
-    }
+// Hilfsfunktion: Abschnitt erzeugen
+function block(title, hint, mode, data){
+  return {title, hint, mode, data};
+}
+// mode: "bi" = gern/ungern (1/0), label an Buttons
 
-    function updateTimeEstimate(){
-      const D = activeData();
-      let total = 0; TYPES.forEach(t=>{ total += D.activities[t].length + D.skills[t].length + D.jobs[t].length; });
-      // 5–7 Sekunden pro Item
-      const min = Math.round((total*5)/60); const max = Math.round((total*7)/60);
-      const el = document.getElementById('timeEstimate'); if(el) el.textContent = `ca. ${min}–${max} Min`;
-    }
+// --- FRAGEN (aus dem abfotografierten Heft, leicht gekürzt & modernisiert) ---
+// Hinweis: Die Inhalte können bei Bedarf im Array erweitert/umformuliert werden.
+const DATA = [
+  block('TÄTIGKEITEN', 'Kreuzen Sie an, was Sie gern bzw. ungern tun würden.', 'bi', {
+    R: [
+      'elektrische Geräte installieren (anschließen, einbauen)',
+      'mit Mechaniker:innen oder Techniker:innen zusammenarbeiten',
+      'aus Holz ein Regal/Bücherbrett bauen',
+      'bei einer Wohnungsrenovierung mitarbeiten',
+      'einen Kurs für Automechanik besuchen',
+      'ein Fahrrad reparieren',
+      'Verstärkeranlage für ein Konzert einrichten',
+      'Maschinen/Werkzeuge mit Motor bedienen',
+      'im Garten oder in der Landwirtschaft arbeiten',
+      'Metall bearbeiten oder Gegenstände aus Metall herstellen'
+    ],
+    I: [
+      'wissenschaftliche Bücher/Zeitschriften lesen',
+      'in einem Forschungslabor oder Labor arbeiten',
+      'einen Biologie‑ oder Physikkurs besuchen',
+      'ein Experiment mit Chemikalien durchführen',
+      'eine mathematische Funktion grafisch darstellen',
+      'eine neue Programmiersprache erlernen',
+      'Quellen/Dokumente über eine historische Epoche analysieren',
+      'an einem naturwissenschaftlichen Projekt arbeiten',
+      'geologische Formationen untersuchen',
+      'über längere Zeit an der Lösung eines Problems arbeiten'
+    ],
+    A: [
+      'zeichnen, skizzieren oder malen',
+      'Möbel, Kleider oder Plakate entwerfen',
+      'ein Musikinstrument spielen',
+      'Porträts oder andere Fotografien aufnehmen',
+      'eine Kurzgeschichte/Ein Roman/Theaterstück schreiben',
+      'Musik arrangieren oder komponieren',
+      'mit begabten Künstler:innen zusammenarbeiten',
+      'auf einer Bühne auftreten',
+      'einen Prospekt grafisch gestalten',
+      'alte Kunstwerke oder Möbel restaurieren'
+    ],
+    S: [
+      'mit anderen freundlich auskommen',
+      'mit Geduld unterrichten oder ausbilden',
+      'in der Nachbarschaftshilfe/Spitex mitarbeiten',
+      'Menschen zuhören, über Probleme sprechen',
+      'mit Kindern umgehen',
+      'Menschen in Krisen unterstützen',
+      'sich in andere hineinversetzen können',
+      'eine warme, vertrauensvolle Atmosphäre schaffen',
+      'lieber mit Menschen als mit Dingen arbeiten',
+      'Kranke oder ältere Menschen betreuen'
+    ],
+    E: [
+      'Strategien für geschäftlichen Erfolg kennenlernen',
+      'Arbeit anderer anleiten/organisieren',
+      'an Konferenzen teilnehmen',
+      'Kurs über Führungs‑ oder Verwaltungstechniken besuchen',
+      'eine Arbeitsgruppe führen',
+      'über Wirtschaft/Politik diskutieren',
+      'als Organisations‑ oder Unternehmensberater:in arbeiten',
+      'Finanzierung einer Veranstaltung planen',
+      'Aktien kaufen/verkaufen',
+      'in der Werbeabteilung eines Unternehmens arbeiten'
+    ],
+    C: [
+      'Buchhaltung führen (für Kleinbetrieb)',
+      'Daten in den Computer eingeben',
+      'Kopierer und andere Büromaschinen bedienen',
+      'Ordnungssystem für Dokumente/ Bücher entwerfen',
+      'Lohnabrechnungen erstellen',
+      'Schreibarbeiten/Belege kontrollieren',
+      'Verzeichnisse für Anschaffungen/Produkte erstellen',
+      'Listen/Dateien führen',
+      'Personal­daten verwalten',
+      'Formulare ausfüllen (z. B. Steuer)'
+    ]
+  }),
 
-    document.addEventListener('change', (e)=>{
-      if(e.target && e.target.id==='lengthSelect'){
-        MODE = e.target.value;
-        document.getElementById('scorePanel').classList.add('hidden');
-        // neu rendern
-        renderActivities(); renderSkills(); renderJobs(); resetAll(); updateTimeEstimate();
-      }
+  block('FÄHIGKEITEN', 'Markieren Sie, was Sie gut und kompetent ausführen können.', 'bi', {
+    R: [
+      'Stichsäge, Drehbank oder Schleifmaschine bedienen',
+      'am Auto Öl oder Reifen wechseln',
+      'mit Näh‑ oder Bohrmaschine arbeiten',
+      'Möbel nach Skizze zusammenbauen oder reparieren',
+      'einfache Elektrik‑Reparaturen ausführen',
+      'Fahrradschlauch auswechseln',
+      'mit der Axt Holz zerkleinern',
+      'verstopftes Abflussrohr reinigen',
+      'Gegenstände aus Holz herstellen',
+      'Wände einer Wohnung tapezieren'
+    ],
+    I: [
+      'Algebra anwenden, mathematische Probleme lösen',
+      'ein Experiment/Projekt durchführen',
+      'Halbwertszeit radioaktiver Elemente verstehen',
+      'mathematische Funktion grafisch darstellen',
+      'chemische Formeln interpretieren',
+      'verstehen, warum Satelliten nicht auf die Erde stürzen',
+      'wissenschaftlichen Bericht schreiben',
+      'Urknall‑Theorie erklären',
+      'Rolle der DNS/Genetik erklären',
+      'Sachverhalt mit wissenschaftlichen Formeln beschreiben'
+    ],
+    A: [
+      'Musikinstrument spielen',
+      'in einem Theaterstück mitspielen',
+      'Gedicht spannend vorlesen',
+      'ein Bild malen',
+      'mit Ton modellieren',
+      'im Chor die zweite Stimme singen',
+      'Kleider, Plakate oder Möbel entwerfen',
+      'gute Geschichten oder Gedichte schreiben',
+      'künstlerische Fotos machen',
+      'Schaufenster dekorieren'
+    ],
+    S: [
+      'schnell freundliche Beziehungen knüpfen',
+      'mit Geduld unterrichten/ausbilden',
+      'Nachbarschaftshilfe leisten',
+      'guten Rat bei Problemen geben',
+      'mit Kindern gut umgehen',
+      'traurige/chaotische Leute beruhigen',
+      'gutes Verständnis für Beziehungen zeigen',
+      'mich in andere einfühlen',
+      'vertrauensvolle Atmosphäre schaffen',
+      'lieber mit Menschen als Dingen arbeiten'
+    ],
+    E: [
+      'Menschen zu Höchstleistungen motivieren',
+      'gut vor Leuten sprechen',
+      'Werbekampagne leiten',
+      'Arbeit anderer anleiten/organisieren',
+      'unternehmerisch denken',
+      'überzeugend sein',
+      'planen und organisieren',
+      'Führungsfähigkeiten zeigen',
+      'ein eigenes Geschäft führen',
+      'erfolgreich verhandeln'
+    ],
+    C: [
+      'große Dokumentmengen systematisch einordnen',
+      'Adressetiketten/Serienbriefe am PC ausdrucken',
+      'viel Schreib‑ oder Büroarbeit in kurzer Zeit erledigen',
+      'Text‑ und Datenverarbeitungsprogramme anwenden',
+      'Einnahmen und Ausgaben richtig verbuchen',
+      'in Buchhaltung Soll/Haben berechnen',
+      'Briefe korrekt in Amtssprache verfassen',
+      'mit großer Ausdauer sorgfältig arbeiten',
+      'Bestell‑ oder Steuerformulare ausfüllen',
+      'mit verschiedenen Bürogeräten gewandt umgehen'
+    ]
+  }),
+
+  block('BERUFE', 'Welche Berufe sprechen Sie an? Kreuzen Sie „ja“ oder „nein“.','bi', {
+    R: ['Flugzeugmechaniker:in','Automechaniker:in','Zimmermann/Zimmerin','Elektriker:in','Helikopterpilot:in','Schreiner:in/Tischler:in','Metallbauer:in','Förster:in','Gärtner:in','Lastwagenfahrer:in'],
+    I: ['Meteorologe/Meteorologin','Biologe/Biologin','Astronom:in','Software‑Entwickler:in','Anthropolog:in','Chemiker:in','Wissenschaftsjournalist:in','Pharmazeut:in','Experimentalpsycholog:in','Medizinisch‑technische:r Laborant:in'],
+    A: ['Keramiker:in / Goldschmied:in','Musiker:in','Fotograf:in/Film‑Schaffende:r','Schauspieler:in','Schriftsteller:in','Innenarchitekt:in','Grafiker:in','Modedesigner:in','Karikaturist:in','Sänger:in'],
+    S: ['Berufsberater:in','Heilpädagog:in','Kindergärtner:in','Berater:in für Drogenabhängige','Lehrlingsausbilder:in','Psychotherapeut:in','Erzieher:in','Logopäd:in','Pflegefachperson','Sozialarbeiter:in'],
+    E: ['Tourismusfachmann/-frau','Betriebswirtschafter:in','Geschäftsführer:in','Unternehmensberater:in','Börsenhändler:in','Verkaufsleiter:in (Marketing)','PR‑Verantwortliche:r','Kundenberater:in','Politiker:in','Manager:in'],
+    C: ['Buchhalter:in','Netzwerk‑Administrator:in','Geschäftsprüfer:in/Controller:in','Bankkassierer:in','Immobilien‑Verwalter:in','Versicherungsexpert:in','Archivarin/Bibliothekar:in','Sekretär:in','Sachbearbeiter:in','Gerichtsbeamter:in']
+  }),
+
+  block('SELBSTEINSCHÄTZUNG', 'Wie stark sehen Sie sich in den einzelnen Bereichen? (1 = gar nicht, 5 = sehr stark).', 'likert', {
+    R: ['praktisch/handwerklich begabt','technisch versiert','körperlich belastbar','gerne „anpacken“','mag Arbeit im Freien'],
+    I: ['logisch‑analytisch','neugierig/forschend','mathematisch interessiert','naturwissenschaftlich interessiert','problemlösend'],
+    A: ['kreativ/gestaltend','musikalisch','schreibend/sprachlich','ästhetisches Empfinden','originelle Ideen'],
+    S: ['empathisch','hilfsbereit','geduldig','kommunikativ','teamorientiert'],
+    E: ['durchsetzungsstark','führungsorientiert','unternehmerisch','risikofreudig','verhandlungssicher'],
+    C: ['ordnend/strukturierend','sorgfältig/zuverlässig','zahlenaffin','regelkonform','büroorganisatorisch stark']
+  })
+];
+
+// Zustände
+let step = 0; // 0..DATA.length-1
+const answers = {}; // {blockIndex: { code: [0/1/2..] }}
+const totals = {R:0,I:0,A:0,S:0,E:0,C:0};
+
+// DOM Referenzen
+const sectionTitle = document.getElementById('sectionTitle');
+const sectionHint  = document.getElementById('sectionHint');
+const itemsWrap    = document.getElementById('items');
+const progressBar  = document.getElementById('progress');
+const nextBtn      = document.getElementById('nextBtn');
+const prevBtn      = document.getElementById('prevBtn');
+const resultCard   = document.getElementById('result');
+const barsWrap     = document.getElementById('bars');
+
+// Legende
+(function renderLegend(){
+  const legend = document.getElementById('legend');
+  Object.entries(LEGEND).forEach(([k,v])=>{
+    const el = document.createElement('span'); el.className='chip'; el.textContent=`${k} – ${v.split('–')[0].trim()}`; legend.appendChild(el);
+  });
+})();
+
+function renderStep(){
+  const blk = DATA[step];
+  sectionTitle.textContent = `${step+1}/${DATA.length} · ${blk.title}`;
+  sectionHint.textContent = blk.hint;
+  itemsWrap.innerHTML = '';
+
+  // Erzeuge Items pro Kategorie (Reihenfolge R I A S E C)
+  const order = ['R','I','A','S','E','C'];
+  const sectionAnswers = answers[step] || (answers[step] = {R:[],I:[],A:[],S:[],E:[],C:[]});
+
+  order.forEach(code=>{
+    const list = blk.data[code];
+    const group = document.createElement('div');
+    group.className='section';
+    group.innerHTML = `<h2>${code} · ${LEGEND[code]}</h2>`;
+
+    list.forEach((text, idx)=>{
+      const row = document.createElement('div');
+      row.className='item';
+      row.innerHTML = `
+        <p>${text}</p>
+        <div class="actions">${blk.mode==='likert' ? likert(code, idx) : biButtons(code, idx)}</div>
+      `;
+      group.appendChild(row);
     });
 
-    // --- Hilfsfunktionen ---
-    const TYPES = ["R","I","A","S","E","C"];
-    const LABELS = {R:"Realistisch", I:"Untersuchend", A:"Künstlerisch", S:"Sozial", E:"Unternehmerisch", C:"Konventionell"};
+    itemsWrap.appendChild(group);
+  });
 
-    function renderActivities(){
-      const root = document.getElementById('sec-activities');
-      root.innerHTML = '';
-      const D = activeData();
-      TYPES.forEach(t => {
-        const sec = document.createElement('section');
-        sec.className = 'section';
-        sec.innerHTML = `<h3><span class=\"badge ${t}\" data-type>${t}</span> <span>${LABELS[t]}</span> · <span class=\"small\">gern / ungern</span></h3>`;
-        const tbl = document.createElement('table');
-        tbl.className = 'tbl';
-        tbl.innerHTML = `<thead><tr><th>Aufgabe</th><th style=\"width:220px; text-align:right\">Auswahl</th></tr></thead>`;
-        const tbody = document.createElement('tbody');
-        D.activities[t].forEach((q,i)=>{
-          const row = document.createElement('tr');
-          const name = `act-${t}-${i}`;
-          row.innerHTML = `
-            <td class="q">${q}</td>
-            <td>
-              <div class="choice">
-                <label><input type="radio" name="${name}" value="1" data-type="${t}" data-group="activities"> gern</label>
-                <label><input type="radio" name="${name}" value="0" data-type="${t}" data-group="activities"> ungern</label>
-              </div>
-            </td>`;
-          tbody.appendChild(row);
-        });
-        tbl.appendChild(tbody); sec.appendChild(tbl); root.appendChild(sec);
-      });
-    }
+  // Progress
+  const totalSteps = DATA.length;
+  progressBar.style.width = `${((step)/totalSteps)*100}%`;
 
-    function renderSkills(){
-      const root = document.getElementById('sec-skills');
-      root.innerHTML = '';
-      const D = activeData();
-      TYPES.forEach(t => {
-        const sec = document.createElement('section');
-        sec.className = 'section';
-        sec.innerHTML = `<h3><span class=\"badge ${t}\" data-type>${t}</span> <span>${LABELS[t]}</span> · <span class=\"small\">Fähigkeiten – ja / nein</span></h3>`;
-        const tbl = document.createElement('table');
-        tbl.className = 'tbl';
-        tbl.innerHTML = `<thead><tr><th>Aussage</th><th style=\"width:220px; text-align:right\">Antwort</th></tr></thead>`;
-        const tbody = document.createElement('tbody');
-        D.skills[t].forEach((q,i)=>{
-          const row = document.createElement('tr');
-          const name = `ski-${t}-${i}`;
-          row.innerHTML = `
-            <td class="q">${q}</td>
-            <td>
-              <div class="choice">
-                <label><input type="radio" name="${name}" value="1" data-type="${t}" data-group="skills"> ja</label>
-                <label><input type="radio" name="${name}" value="0" data-type="${t}" data-group="skills"> nein</label>
-              </div>
-            </td>`;
-          tbody.appendChild(row);
-        });
-        tbl.appendChild(tbody); sec.appendChild(tbl); root.appendChild(sec);
-      });
-    }
+  // Buttons
+  prevBtn.disabled = step===0;
+  nextBtn.textContent = step < DATA.length-1 ? 'Weiter' : 'Auswertung anzeigen';
 
-    function renderJobs(){
-      const root = document.getElementById('sec-jobs');
-      root.innerHTML = '';
-      const D = activeData();
-      TYPES.forEach(t => {
-        const sec = document.createElement('section');
-        sec.className = 'section';
-        sec.innerHTML = `<h3><span class=\"badge ${t}\" data-type>${t}</span> <span>${LABELS[t]}</span> · <span class=\"small\">Berufe – ja / nein</span></h3>`;
-        const tbl = document.createElement('table');
-        tbl.className = 'tbl';
-        tbl.innerHTML = `<thead><tr><th>Beruf</th><th style=\"width:220px; text-align:right\">Antwort</th></tr></thead>`;
-        const tbody = document.createElement('tbody');
-        D.jobs[t].forEach((q,i)=>{
-          const row = document.createElement('tr');
-          const name = `job-${t}-${i}`;
-          row.innerHTML = `
-            <td class="q">${q}</td>
-            <td>
-              <div class="choice">
-                <label><input type="radio" name="${name}" value="1" data-type="${t}" data-group="jobs"> ja</label>
-                <label><input type="radio" name="${name}" value="0" data-type="${t}" data-group="jobs"> nein</label>
-              </div>
-            </td>`;
-          tbody.appendChild(row);
-        });
-        tbl.appendChild(tbody); sec.appendChild(tbl); root.appendChild(sec);
-      });
-    }
+  // Tastaturkürzel (G/U)
+  window.onkeydown = (e)=>{
+    if(['g','G'].includes(e.key)) { document.querySelector('[data-hotkey="g"]')?.click(); }
+    if(['u','U'].includes(e.key)) { document.querySelector('[data-hotkey="u"]')?.click(); }
+  }
 
-    // --- Scoring ---
-    const SCORE = {activities:{}, skills:{}, jobs:{}, total:{}};
-    TYPES.forEach(t=>{SCORE.activities[t]=0; SCORE.skills[t]=0; SCORE.jobs[t]=0; SCORE.total[t]=0;});
+  function biButtons(code, idx){
+    const state = sectionAnswers[code][idx] ?? null; // null/0/1
+    const yesActive = state===1 ? 'active' : '';
+    const noActive = state===0 ? 'active' : '';
+    return `
+      <div class="pill" role="group" aria-label="Antwort wählen">
+        <button class="small ${yesActive}" data-choice="1" data-code="${code}" data-idx="${idx}" data-hotkey="g" aria-pressed="${state===1}">gern / ja</button>
+        <button class="small ${noActive}" data-choice="0" data-code="${code}" data-idx="${idx}" data-hotkey="u" aria-pressed="${state===0}">ungern / nein</button>
+      </div>`;
+  }
+  function likert(code, idx){
+    const val = sectionAnswers[code][idx] ?? 3; // default 3
+    return `
+      <label class="muted" style="display:inline-flex;align-items:center;gap:8px">
+        <span style="min-width:42px;text-align:right">${val}</span>
+        <input type="range" min="1" max="5" step="1" value="${val}" data-code="${code}" data-idx="${idx}" class="likert"/>
+      </label>`;
+  }
+}
 
-    function updateScore(){
-      // zurücksetzen
-      TYPES.forEach(t=>{SCORE.activities[t]=0; SCORE.skills[t]=0; SCORE.jobs[t]=0; SCORE.total[t]=0;});
+// Delegation für Buttons/Slider
+itemsWrap.addEventListener('click', (e)=>{
+  const t = e.target.closest('button.small');
+  if(!t) return;
+  const code = t.dataset.code, idx = +t.dataset.idx, choice = +t.dataset.choice; 
+  const sectionAnswers = answers[step];
+  sectionAnswers[code][idx] = choice;
+  renderStep();
+});
+itemsWrap.addEventListener('input', (e)=>{
+  const t = e.target; if(!t.classList.contains('likert')) return;
+  const code = t.dataset.code, idx = +t.dataset.idx, val = +t.value;
+  answers[step][code][idx] = val; // 1..5
+  t.previousElementSibling.textContent = val;
+});
 
-      document.querySelectorAll('input[type="radio"]').forEach(el=>{
-        if(el.checked && el.value==='1'){
-          const t = el.dataset.type; const g = el.dataset.group;
-          SCORE[g][t]++; SCORE.total[t]++;
-        }
-      });
-      drawScore();
-    }
+nextBtn.addEventListener('click', ()=>{
+  if(step < DATA.length-1){ step++; renderStep(); }
+  else { evaluate(); }
+});
+prevBtn.addEventListener('click', ()=>{ if(step>0){ step--; renderStep(); }});
 
-    function drawScore(){
-      const wrap = document.getElementById('scoreCards');
-      wrap.innerHTML='';
-      const D = activeData();
-      const maxPerType = (D.activities.R.length + D.skills.R.length + D.jobs.R.length);
-      TYPES.forEach(t=>{
-        const total = SCORE.total[t];
-        const percent = Math.round((total / maxPerType) * 100);
-        const card = document.createElement('div');
-        card.className='kpi';
-        card.innerHTML=`<div><strong>${t}</strong> · ${LABELS[t]} <div class="small">${SCORE.activities[t]} Tätigkeiten · ${SCORE.skills[t]} Fähigkeiten · ${SCORE.jobs[t]} Berufe</div></div>
-                        <div style="min-width:120px; text-align:right"><strong>${total}</strong> / ${maxPerType}</div>`;
-        const barwrap = document.createElement('div');
-        barwrap.className='barwrap';
-        const bar = document.createElement('div'); bar.className='bar'; bar.style.width = percent + '%';
-        barwrap.appendChild(bar); wrap.appendChild(card); wrap.appendChild(barwrap);
-      });
-      // Top3 Code
-      const res = document.getElementById('result');
-      const arr = TYPES.map(t=>({t, v:SCORE.total[t]})).sort((a,b)=>b.v-a.v);
-      const top3 = arr.slice(0,3).map(x=>x.t).join('');
-      res.innerHTML = `<div class="codeBox"><div class="bigCode">${top3.split('').join(' ')}</div><div class="sub">Dein RIASEC‑Code</div></div>`;
-      res.innerHTML = arr.slice(0,3).map(x=>`<span class="pill">${x.t}</span>`).join('');
-      res.insertAdjacentHTML('beforeend', `<div class="small" style="grid-column:1 / -1">Ihr Drei‑Buchstaben‑Code · <strong>${arr.slice(0,3).map(x=>x.t).join('')}</strong></div>`);
-    }
+function evaluate(){
+  // Fortschrittsbalken voll
+  progressBar.style.width = '100%';
 
-    function exportJSON(){
-      const payload = {timestamp:new Date().toISOString(), answers:[], score:SCORE};
-      document.querySelectorAll('input[type="radio"]').forEach(el=>{
-        if(el.checked){
-          payload.answers.push({name:el.name, value:el.value, type:el.dataset.type, group:el.dataset.group});
-        }
-      });
-      const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href=url; a.download='riasec_fragebogen.json'; a.click();
-      URL.revokeObjectURL(url);
-    }
+  // Totale zurücksetzen
+  Object.keys(totals).forEach(k=>totals[k]=0);
 
-    function resetAll(){
-      document.querySelectorAll('input[type="radio"]').forEach(el=>{el.checked=false});
-      updateScore(); updateTimeEstimate();
-    }
-
-    // render & init
-    renderActivities();
-    renderSkills();
-    renderJobs();
-    document.addEventListener('change', e=>{ if(e.target.matches('input[type="radio"]')) updateScore(); });
-    // Buttons werden erst nach Rendern sichtbar sein
-    document.addEventListener('click', e=>{
-      if(e.target && e.target.id==='exportBtn') exportJSON();
-      if(e.target && e.target.id==='resetBtn'){ resetAll(); window.scrollTo({top:0, behavior:'smooth'}); }
-      if(e.target && e.target.id==='showResults'){
-        // Auswertung anzeigen
-        document.getElementById('scorePanel').classList.remove('hidden');
-        updateScore();
-        document.getElementById('scorePanel').scrollIntoView({behavior:'smooth'});
-      }
+  // Block 1–3 (bi): Punkte = Anzahl „gern/ja“
+  for(let i=0;i<3;i++){
+    const blockAns = answers[i];
+    Object.keys(blockAns).forEach(code=>{
+      const pts = (blockAns[code]||[]).reduce((s,v)=> s + (v===1 ? 1 : 0), 0);
+      totals[code]+=pts;
     });
-    updateScore();
-  </script>
+  }
+  // Block 4 (likert): 1..5 skalieren (hier: >=4 zählt als 1 Punkt, sonst 0)
+  const lik = answers[3];
+  Object.keys(lik).forEach(code=>{
+    const pts = (lik[code]||[]).reduce((s,v)=> s + (v>=4 ? 1 : 0), 0);
+    totals[code]+=pts;
+  });
+
+  // Anzeige
+  document.getElementById('formCard').style.display='none';
+  resultCard.style.display='block';
+
+  // Balken
+  barsWrap.innerHTML='';
+  const maxPossible = 30 + 5; // grob: 3*10 + ~5 likert (pro Code) – passt zu den Arrays oben
+  const entries = Object.entries(totals);
+
+  entries.forEach(([code,val])=>{
+    const row = document.createElement('div'); row.className='bar';
+    row.innerHTML = `<strong>${code}</strong><div class="track"><div class="fill" style="width:${(val/maxPossible)*100}%"></div></div>`;
+    barsWrap.appendChild(row);
+  });
+
+  // Code bilden (Top‑3)
+  const sorted = entries.sort((a,b)=> b[1]-a[1]);
+  const [c1,c2,c3] = sorted.slice(0,3).map(x=>x[0]);
+  const [v1,v2,v3] = sorted.slice(0,3).map(x=>x[1]);
+  document.getElementById('code1').textContent = c1 || '–';
+  document.getElementById('code2').textContent = c2 || '–';
+  document.getElementById('code3').textContent = c3 || '–';
+  document.getElementById('explain').textContent = `Dein Drei‑Buchstaben‑Code: ${c1}${c2}${c3}. (${LEGEND[c1].split('–')[0]}, ${LEGEND[c2].split('–')[0]}, ${LEGEND[c3].split('–')[0]})`;
+
+  // Details
+  const tbl = [`<table style="border-collapse:collapse;min-width:520px">`,
+    `<thead><tr>${['Code','Bezeichnung','Punkte'].map(h=>`<th style='text-align:left;padding:6px 10px;border-bottom:1px solid #294'>${h}</th>`).join('')}</tr></thead>`,
+    '<tbody>'];
+  sorted.forEach(([k,v])=>{
+    tbl.push(`<tr><td style='padding:6px 10px'>${k}</td><td style='padding:6px 10px' class='muted'>${LEGEND[k]}</td><td style='padding:6px 10px'><strong>${v}</strong></td></tr>`);
+  });
+  tbl.push('</tbody></table>');
+  document.getElementById('detailTable').innerHTML = tbl.join('');
+}
+
+// Restart
+ document.getElementById('restart').addEventListener('click', ()=>{ location.reload(); });
+ document.getElementById('printBtn').addEventListener('click', ()=>{ window.print(); });
+
+// Initial render
+renderStep();
+</script>
 </body>
 </html>
