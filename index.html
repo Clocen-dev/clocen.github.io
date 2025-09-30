@@ -79,6 +79,34 @@
 
     .kbd{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size:.9rem; background:#0b1220;border:1px solid #1f2937;border-radius:8px;padding:.15rem .35rem}
   </style>
+<style>
+  /* Nur fürs Drucken */
+  @media print {
+    @page { size: A4; margin: 18mm; }
+
+    /* Alles ausblenden … */
+    body, html { background: #fff !important; }
+    .wrap > * { display: none !important; }
+    /* … außer der Ergebnis-Karte */
+    #result { display: block !important; box-shadow: none !important; border: none !important; }
+    #result .footer-actions { display: none !important; } /* Buttons im PDF ausblenden */
+    header, .grid, #formCard { display: none !important; }
+
+    /* Druck-Kopfzeile sichtbar machen */
+    .print-header { display: block !important; margin: 0 0 12px; }
+    .print-header h1 { margin: 0 0 6px; font-size: 18pt; }
+    .print-header .meta { color: #333; font-size: 10pt; }
+
+    /* Farben/Flächen im PDF klarer darstellen */
+    .bar .track { border: 1px solid #999 !important; background: #f2f2f2 !important; }
+    .bar .fill { background: #555 !important; } /* neutrale Füllfarbe fürs PDF */
+    .muted { color: #444 !important; }
+    .code { border: 1px solid #bbb !important; background: #f7f7f7 !important; color: #000 !important; }
+  }
+
+  /* Auf dem Screen bleibt die Kopfzeile unsichtbar */
+  .print-header { display: none; }
+</style>
 </head>
 <body>
   <div class="wrap">
@@ -123,6 +151,11 @@
 
     <section id="result" class="card result" aria-live="polite">
       <h2 style="margin-top:0">Auswertung</h2>
+<div class="print-header" aria-hidden="true">
+  <h1>RIASEC – Auswertung</h1>
+  <div class="meta" id="printMeta"></div>
+</div>
+
       <p class="hint">Summen über alle 4 Blöcke hinweg. Punkte = Anzahl „gern/ja“.</p>
       <div class="bars" id="bars"></div>
       <div class="codebox">
@@ -506,6 +539,30 @@ function evaluate(){
 
 // Initial render
 renderStep();
+</script>
+<script>
+
+  // Druck-Metadaten: Datum + Drei-Buchstaben-Code
+  (function() {
+    try {
+      const now = new Date();
+      const datum = now.toLocaleString('de-CH', { dateStyle: 'medium', timeStyle: 'short' });
+      // Versuche, bestehende Code-Variablen zu ermitteln
+      const codeParts = [];
+      if (typeof c1 !== 'undefined') codeParts.push(c1);
+      if (typeof c2 !== 'undefined') codeParts.push(c2);
+      if (typeof c3 !== 'undefined') codeParts.push(c3);
+      // Fallback: Suche Textknoten im Ergebnis
+      let fallback = '';
+      const codeNode = document.querySelector('#result [data-code], #code, .code');
+      if (codeNode) fallback = (codeNode.textContent || '').replace(/\s+/g,'').slice(0,3);
+      const druckCode = (codeParts.join('') || fallback || '–––').padEnd(3,'–').slice(0,3);
+      const metaEl = document.getElementById('printMeta');
+      if (metaEl) metaEl.textContent = `Datum: ${datum} · Code: ${druckCode}`;
+    } catch(e) {
+      /* no-op */
+    }
+  })();
 </script>
 </body>
 </html>
