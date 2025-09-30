@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EXPLORIX® / RIASEC – Digitaler Fragebogen</title>
+  <style>
+    :root{
+      --bg:#0b0d10;           /* dunkles Thema */
+      --panel:#12161b;
+      --muted:#6b7280;
+      --text:#e5e7eb;
+      --accent:#60a5fa;       /* Blau */
+      --accent-2:#34d399;     /* Grün */
+      --accent-3:#f59e0b;     /* Orange */
+      --danger:#ef4444;
+      --card:#0f1318;
+      --ring:0 0 0 2px var(--accent) inset;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Inter,"Helvetica Neue",Arial; 
+      background:linear-gradient(180deg,#0b0d10,#0a0c0f 40%,#0b0d10);
+      color:var(--text);
+    }
+    .container{max-width:1100px; margin:32px auto; padding:0 16px 120px}
+    header{display:none}
+    header .bar{max-width:1100px; margin:auto; padding:14px 16px; display:flex; gap:12px; align-items:center; justify-content:space-between}
+    h1{font-size:clamp(20px,3vw,28px); margin:0; letter-spacing:.2px}
+    .pill{display:inline-flex; gap:8px; align-items:center; padding:6px 10px; background:#111827; border:1px solid #1f2937; border-radius:8px; color:#cbd5e1; font-size:12px}
+    .small{font-size:12px; color:var(--muted)}
+
+    .grid{display:grid; grid-template-columns:1fr; gap:18px}
+    @media (min-width:960px){
+      .grid{grid-template-columns: 1fr}
+    }
+
+    .card{background:var(--panel); border:1px solid #1f2937; border-radius:16px; box-shadow:0 6px 24px rgba(0,0,0,.35)}
+    .card h2{margin:0 0 4px; font-size:20px}
+    .card header{position:unset; backdrop-filter:none; background:transparent; border:none}
+    .card .body{padding:18px}
+
+    .section{margin:14px 0 8px; border-top:1px dashed #273244; padding-top:14px}
+    .section h3{margin:0 0 12px; display:flex; align-items:center; gap:10px}
+    .badge{font-weight:700; letter-spacing:.6px; font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid #374151; background:#0f141c}
+    .R{--tag:#93c5fd} .I{--tag:#a7f3d0} .A{--tag:#fbcfe8} .S{--tag:#fde68a} .E{--tag:#c7d2fe} .C{--tag:#fca5a5}
+    .badge[data-type]{border-color:color-mix(in srgb, var(--tag), #374151 50%); background:color-mix(in srgb, var(--tag), #0b0d10 85%); color:#e5e7eb}
+
+    .tbl{width:100%; border-collapse:collapse; font-size:15px}
+    .tbl thead th{position:sticky; top:0; background:#0f1318; font-weight:600}
+    .tbl th,.tbl td{padding:10px 8px; border-bottom:1px dashed #243143; vertical-align:top}
+    .tbl th:first-child,.tbl td:first-child{padding-left:0}
+    .tbl td:last-child,.tbl th:last-child{padding-right:0}
+    .tbl .q{color:#d1d5db}
+
+    .choice{display:flex; gap:10px; justify-content:flex-end; align-items:center}
+    .choice label{display:inline-flex; align-items:center; gap:6px; padding:6px 8px; border:1px solid #273244; background:#0d1219; border-radius:10px; cursor:pointer; user-select:none}
+    .choice input{appearance:none; width:16px; height:16px; border-radius:50%; border:1px solid #334155; display:inline-block; position:relative}
+    .choice input:checked{outline:var(--ring); box-shadow:0 0 0 3px rgba(96,165,250,.25)}
+
+    .stack{display:flex; flex-direction:column; gap:10px}
+
+    .score{margin-top:18px} .hidden{display:none} 
+    .score .kpi{display:grid; grid-template-columns:1fr auto; gap:8px; align-items:center; padding:10px 12px; border-radius:12px; background:#0d1318; border:1px solid #223042}
+    .barwrap{height:8px; background:#111827; border-radius:999px; overflow:hidden}
+    .bar{height:100%; width:0%; background:linear-gradient(90deg,var(--accent),var(--accent-2)); transition:width .25s ease}
+
+    .buttons{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
+    button{background:var(--accent); color:#0b0d10; border:none; border-radius:10px; padding:10px 14px; font-weight:700; cursor:pointer}
+    button.alt{background:#0f1318; color:#e5e7eb; border:1px solid #243143}
+    .result{display:block; margin-top:16px}
+    .bigCode{font-size:44px; font-weight:900; letter-spacing:6px; text-align:center; margin:6px 0 2px}
+    .codeBox{border:1px solid #243143; background:#0d1219; border-radius:14px; padding:14px}
+    .codeBox .sub{font-size:13px; color:#9ca3af; text-align:center}
+    .summaryGrid{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px}
+    .summaryGrid .kpi{background:#0d1219}
+    .section-title{display:flex; align-items:center; gap:8px}
+    .section-title .num{width:28px; height:28px; display:inline-grid; place-items:center; border-radius:8px; background:#0d1219; border:1px solid #243143; font-weight:800}
+    .result .pill{justify-content:center; font-weight:800}
+    .warn{color:#fca5a5}
+    .footer{margin-top:24px; font-size:12px; color:#9ca3af}
+    .legend{display:flex; gap:10px; flex-wrap:wrap; margin-top:8px}
+    .legend .badge{opacity:.9}
+
+    /* print */
+    @media print{
+      header, .buttons, .footer{display:none}
+      body{background:#fff; color:#000}
+      .card, .score, .section{break-inside:avoid}
+    }
+  </style>
+</head>
+<body>
+  
+
+  <div class="container grid">
+    <!-- LEFT: FORM -->
+    <div class="card">
+      <div class="body">
+        <h2>Kurz erklärt</h2>
+        <div class="nice-guide">
+          <ul style="margin:0 10px 8px 18px; line-height:1.7">
+            <li><strong>Pro Zeile genau eine Auswahl</strong> treffen.</li>
+            <li><em>Tätigkeiten</em>: <strong>gern</strong> oder <strong>ungern</strong>.</li>
+            <li><em>Fähigkeiten</em> &amp; <em>Berufe</em>: <strong>ja</strong> oder <strong>nein</strong>.</li>
+            <li>Am Ende auf <em>Auswertung anzeigen</em> klicken – dann siehst du Punkte &amp; Code.</li>
+          </ul>
+          <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:8px">
+            <label class="pill" style="cursor:pointer">Länge:&nbsp;
+              <select id="lengthSelect" style="background:transparent; border:none; color:#e5e7eb">
+                <option value="standard">Standard</option>
+                <option value="short">Kurz</option>
+              </select>
+            </label>
+            <span class="pill" id="timePill">Dauer: <span id="timeEstimate">ca. 8–12 Min</span></span>
+          </div>
+          <p class="small" style="margin:8px 0 0">Datenschutz: Deine Eingaben bleiben auf diesem Gerät und werden nicht übertragen.</p>
+          <div class="legend" style="margin-top:10px">
+            <span class="badge R" data-type>R</span>
+            <span class="badge I" data-type>I</span>
+            <span class="badge A" data-type>A</span>
+            <span class="badge S" data-type>S</span>
+            <span class="badge E" data-type>E</span>
+            <span class="badge C" data-type>C</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <!-- RIGHT: SCORE -->
+    
+
+    <!-- ====== FORM SECTIONS ====== -->
+    <section id="form" class="card" style="grid-column:1 / span 1">
+      <div class="body">
+        <h2 class="section-title"><span class="num">1</span> Tätigkeiten</h2>
+        <div id="sec-activities"></div>
+
+        <div class="section"><h2 class="section-title"><span class="num">2</span> Fähigkeiten</h2></div>
+        <div id="sec-skills"></div>
+
+        <div class="section"><h2 class="section-title"><span class="num">3</span> Berufe</h2></div>
+        <div id="sec-jobs"></div>
+
+        <div class="section" style="margin-top:20px">
+          <button type="button" id="showResults">Auswertung anzeigen</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="scorePanel" class="card score hidden" style="grid-column:1 / span 1">
+      <div class="body">
+        <h2 class="section-title"><span class="num">✓</span> Auswertung</h2>
+        <div class="stack" id="scoreCards"></div>
+        <div class="result" id="result"></div>
+        <div class="buttons">
+          <button type="button" id="exportBtn">Antworten exportieren (JSON)</button>
+          <button type="button" class="alt" id="resetBtn">Zurücksetzen</button>
+          <button type="button" class="alt" onclick="window.print()">Drucken</button>
+        </div>
+        <p class="small footer">Hinweis: Die Darstellung dient der digitalen Erfassung und einer ersten Orientierung.</p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // --- Datensätze (aus den Fotos übertragen; bei Bedarf beliebig erweitern) ---
+    const DATA = {
+      activities: {
+        R: [
+          "elektrische Geräte installieren",
+          "mit Mechaniker/Techniker zusammenarbeiten",
+          "ein Fahrrad reparieren",
+          "Maschinen mit Motor bedienen",
+          "im Garten oder in der Landwirtschaft arbeiten",
+          "Metall oder Holz bearbeiten",
+        ],
+        I: [
+          "wissenschaftliche Artikel lesen",
+          "in einem Labor/Projekt arbeiten",
+          "ein Experiment durchführen",
+          "eine neue Programmiersprache lernen",
+          "über längere Zeit an Problemen arbeiten",
+          "einen wissenschaftlichen Bericht schreiben",
+        ],
+        A: [
+          "zeichnen oder gestalten",
+          "Musikinstrument spielen",
+          "Fotografieren/Porträts aufnehmen",
+          "eine Geschichte oder ein Theaterstück schreiben",
+          "vor Publikum auftreten",
+          "Prospekt/Poster grafisch gestalten",
+        ],
+        S: [
+          "bei einem gemeinnützigen Verein mitarbeiten",
+          "jemanden im Krankenhaus/Altersheim besuchen",
+          "über Beziehungsprobleme reden",
+          "Kindern bei den Schulaufgaben helfen",
+          "in einer Beratungsstelle arbeiten",
+          "andere medizinisch versorgen/pflegen",
+        ],
+        E: [
+          "Arbeit anderer anleiten/organisieren",
+          "Verantwortung für eine Gruppe übernehmen",
+          "ein eigenes Geschäft führen",
+          "als Organisations-/Unternehmensberater/in arbeiten",
+          "die Finanzierung einer Veranstaltung planen",
+          "an der Börse handeln oder verhandeln",
+        ],
+        C: [
+          "Buchhaltung/Tabellen führen",
+          "Daten in den Computer eingeben",
+          "Büromaschinen bedienen",
+          "Ordnungssystem für Dokumente entwerfen",
+          "Schreibarbeiten/Rechnungen prüfen",
+          "Formulare korrekt ausfüllen",
+        ],
+      },
+      skills: {
+        R: [
+          "ich kann Maschinen/Werkzeuge sicher bedienen",
+          "ich kann Möbel zusammenbauen/reparieren",
+          "ich kann einfache Elektrik‑Reparaturen ausführen",
+          "ich kann einen Fahrradschlauch wechseln",
+          "ich kann Holz bearbeiten",
+          "ich kann Wände tapezieren oder streichen",
+        ],
+        I: [
+          "ich kann mit Algebra/Mathe Probleme lösen",
+          "ich kann Experimente/Projekte durchführen",
+          "ich kann eine Funktion grafisch darstellen",
+          "ich verstehe einfache chemische Formeln",
+          "ich kann einen wissenschaftlichen Bericht schreiben",
+          "ich kenne Grundideen der Genetik/Physik",
+        ],
+        A: [
+          "ich kann ein Instrument spielen",
+          "ich kann in einem Theaterstück mitspielen",
+          "ich kann gut malen/gestalten",
+          "ich kann Texte oder Geschichten schreiben",
+          "ich kann gute Fotos machen",
+          "ich kann ansprechende Designs entwerfen",
+        ],
+        S: [
+          "ich komme leicht mit Menschen in Kontakt",
+          "ich kann geduldig unterrichten/erklären",
+          "ich kann mich gut einfühlen",
+          "ich kann mit Kindern gut umgehen",
+          "ich kann eine vertrauensvolle Atmosphäre schaffen",
+          "ich kann Menschen zuhause betreuen",
+        ],
+        E: [
+          "ich kann Gruppen motivieren",
+          "ich kann gut präsentieren",
+          "ich kann planen und organisieren",
+          "ich habe Führungsfähigkeiten",
+          "ich kann ein Geschäft führen",
+          "ich kann erfolgreich verhandeln",
+        ],
+        C: [
+          "ich kann Dokumente systematisch ordnen",
+          "ich kann viel Büroarbeit zügig erledigen",
+          "ich kann Text-/Tabellenprogramme sicher anwenden",
+          "ich kann Einnahmen/Ausgaben verbuchen",
+          "ich kann Formulare korrekt ausfüllen",
+          "ich halte mich zuverlässig an Vorschriften",
+        ],
+      },
+      jobs: {
+        R: ["Automechaniker/in","Elektriker/in","Zimmermann/Zimmerin","Metallbauer/in"],
+        I: ["Biologe/Biologielaborant/in","Software‑Entwickler/in","Historiker/in","Medizinische/r Laborant/in"],
+        A: ["Musiker/in","Fotograf/in","Grafiker/in","Modegestalter/in"],
+        S: ["Sozialarbeiter/in","Psychotherapeut/in","Kindergärtner/in","Berufsberater/in"],
+        E: ["Unternehmensberater/in","PR‑Verantwortliche/r","Verkaufsleiter/in","Manager/in"],
+        C: ["Buchhalter/in","Bankkassierer/in","Immobilien‑Verwalter/in","Sekretär/in"]
+      }
+    };
+
+    // --- Modus (Standard/Kurz) & Hilfsfunktionen ---
+    let MODE = 'standard'; // 'standard' oder 'short'
+    function activeData(){
+      // bei Kurzmodus reduzieren: 3 Akt./3 Skills/2 Jobs pro Typ
+      const aN = MODE==='short' ? 3 : undefined;
+      const sN = MODE==='short' ? 3 : undefined;
+      const jN = MODE==='short' ? 2 : undefined;
+      const pick = (arr,n)=> (n? arr.slice(0,n): arr.slice());
+      const out = {activities:{}, skills:{}, jobs:{}};
+      TYPES.forEach(t=>{
+        out.activities[t]=pick(DATA.activities[t], aN);
+        out.skills[t]=pick(DATA.skills[t], sN);
+        out.jobs[t]=pick(DATA.jobs[t], jN);
+      });
+      return out;
+    }
+
+    function updateTimeEstimate(){
+      const D = activeData();
+      let total = 0; TYPES.forEach(t=>{ total += D.activities[t].length + D.skills[t].length + D.jobs[t].length; });
+      // 5–7 Sekunden pro Item
+      const min = Math.round((total*5)/60); const max = Math.round((total*7)/60);
+      const el = document.getElementById('timeEstimate'); if(el) el.textContent = `ca. ${min}–${max} Min`;
+    }
+
+    document.addEventListener('change', (e)=>{
+      if(e.target && e.target.id==='lengthSelect'){
+        MODE = e.target.value;
+        document.getElementById('scorePanel').classList.add('hidden');
+        // neu rendern
+        renderActivities(); renderSkills(); renderJobs(); resetAll(); updateTimeEstimate();
+      }
+    });
+
+    // --- Hilfsfunktionen ---
+    const TYPES = ["R","I","A","S","E","C"];
+    const LABELS = {R:"Realistisch", I:"Untersuchend", A:"Künstlerisch", S:"Sozial", E:"Unternehmerisch", C:"Konventionell"};
+
+    function renderActivities(){
+      const root = document.getElementById('sec-activities');
+      root.innerHTML = '';
+      const D = activeData();
+      TYPES.forEach(t => {
+        const sec = document.createElement('section');
+        sec.className = 'section';
+        sec.innerHTML = `<h3><span class=\"badge ${t}\" data-type>${t}</span> <span>${LABELS[t]}</span> · <span class=\"small\">gern / ungern</span></h3>`;
+        const tbl = document.createElement('table');
+        tbl.className = 'tbl';
+        tbl.innerHTML = `<thead><tr><th>Aufgabe</th><th style=\"width:220px; text-align:right\">Auswahl</th></tr></thead>`;
+        const tbody = document.createElement('tbody');
+        D.activities[t].forEach((q,i)=>{
+          const row = document.createElement('tr');
+          const name = `act-${t}-${i}`;
+          row.innerHTML = `
+            <td class="q">${q}</td>
+            <td>
+              <div class="choice">
+                <label><input type="radio" name="${name}" value="1" data-type="${t}" data-group="activities"> gern</label>
+                <label><input type="radio" name="${name}" value="0" data-type="${t}" data-group="activities"> ungern</label>
+              </div>
+            </td>`;
+          tbody.appendChild(row);
+        });
+        tbl.appendChild(tbody); sec.appendChild(tbl); root.appendChild(sec);
+      });
+    }
+
+    function renderSkills(){
+      const root = document.getElementById('sec-skills');
+      root.innerHTML = '';
+      const D = activeData();
+      TYPES.forEach(t => {
+        const sec = document.createElement('section');
+        sec.className = 'section';
+        sec.innerHTML = `<h3><span class=\"badge ${t}\" data-type>${t}</span> <span>${LABELS[t]}</span> · <span class=\"small\">Fähigkeiten – ja / nein</span></h3>`;
+        const tbl = document.createElement('table');
+        tbl.className = 'tbl';
+        tbl.innerHTML = `<thead><tr><th>Aussage</th><th style=\"width:220px; text-align:right\">Antwort</th></tr></thead>`;
+        const tbody = document.createElement('tbody');
+        D.skills[t].forEach((q,i)=>{
+          const row = document.createElement('tr');
+          const name = `ski-${t}-${i}`;
+          row.innerHTML = `
+            <td class="q">${q}</td>
+            <td>
+              <div class="choice">
+                <label><input type="radio" name="${name}" value="1" data-type="${t}" data-group="skills"> ja</label>
+                <label><input type="radio" name="${name}" value="0" data-type="${t}" data-group="skills"> nein</label>
+              </div>
+            </td>`;
+          tbody.appendChild(row);
+        });
+        tbl.appendChild(tbody); sec.appendChild(tbl); root.appendChild(sec);
+      });
+    }
+
+    function renderJobs(){
+      const root = document.getElementById('sec-jobs');
+      root.innerHTML = '';
+      const D = activeData();
+      TYPES.forEach(t => {
+        const sec = document.createElement('section');
+        sec.className = 'section';
+        sec.innerHTML = `<h3><span class=\"badge ${t}\" data-type>${t}</span> <span>${LABELS[t]}</span> · <span class=\"small\">Berufe – ja / nein</span></h3>`;
+        const tbl = document.createElement('table');
+        tbl.className = 'tbl';
+        tbl.innerHTML = `<thead><tr><th>Beruf</th><th style=\"width:220px; text-align:right\">Antwort</th></tr></thead>`;
+        const tbody = document.createElement('tbody');
+        D.jobs[t].forEach((q,i)=>{
+          const row = document.createElement('tr');
+          const name = `job-${t}-${i}`;
+          row.innerHTML = `
+            <td class="q">${q}</td>
+            <td>
+              <div class="choice">
+                <label><input type="radio" name="${name}" value="1" data-type="${t}" data-group="jobs"> ja</label>
+                <label><input type="radio" name="${name}" value="0" data-type="${t}" data-group="jobs"> nein</label>
+              </div>
+            </td>`;
+          tbody.appendChild(row);
+        });
+        tbl.appendChild(tbody); sec.appendChild(tbl); root.appendChild(sec);
+      });
+    }
+
+    // --- Scoring ---
+    const SCORE = {activities:{}, skills:{}, jobs:{}, total:{}};
+    TYPES.forEach(t=>{SCORE.activities[t]=0; SCORE.skills[t]=0; SCORE.jobs[t]=0; SCORE.total[t]=0;});
+
+    function updateScore(){
+      // zurücksetzen
+      TYPES.forEach(t=>{SCORE.activities[t]=0; SCORE.skills[t]=0; SCORE.jobs[t]=0; SCORE.total[t]=0;});
+
+      document.querySelectorAll('input[type="radio"]').forEach(el=>{
+        if(el.checked && el.value==='1'){
+          const t = el.dataset.type; const g = el.dataset.group;
+          SCORE[g][t]++; SCORE.total[t]++;
+        }
+      });
+      drawScore();
+    }
+
+    function drawScore(){
+      const wrap = document.getElementById('scoreCards');
+      wrap.innerHTML='';
+      const D = activeData();
+      const maxPerType = (D.activities.R.length + D.skills.R.length + D.jobs.R.length);
+      TYPES.forEach(t=>{
+        const total = SCORE.total[t];
+        const percent = Math.round((total / maxPerType) * 100);
+        const card = document.createElement('div');
+        card.className='kpi';
+        card.innerHTML=`<div><strong>${t}</strong> · ${LABELS[t]} <div class="small">${SCORE.activities[t]} Tätigkeiten · ${SCORE.skills[t]} Fähigkeiten · ${SCORE.jobs[t]} Berufe</div></div>
+                        <div style="min-width:120px; text-align:right"><strong>${total}</strong> / ${maxPerType}</div>`;
+        const barwrap = document.createElement('div');
+        barwrap.className='barwrap';
+        const bar = document.createElement('div'); bar.className='bar'; bar.style.width = percent + '%';
+        barwrap.appendChild(bar); wrap.appendChild(card); wrap.appendChild(barwrap);
+      });
+      // Top3 Code
+      const res = document.getElementById('result');
+      const arr = TYPES.map(t=>({t, v:SCORE.total[t]})).sort((a,b)=>b.v-a.v);
+      const top3 = arr.slice(0,3).map(x=>x.t).join('');
+      res.innerHTML = `<div class="codeBox"><div class="bigCode">${top3.split('').join(' ')}</div><div class="sub">Dein RIASEC‑Code</div></div>`;
+      res.innerHTML = arr.slice(0,3).map(x=>`<span class="pill">${x.t}</span>`).join('');
+      res.insertAdjacentHTML('beforeend', `<div class="small" style="grid-column:1 / -1">Ihr Drei‑Buchstaben‑Code · <strong>${arr.slice(0,3).map(x=>x.t).join('')}</strong></div>`);
+    }
+
+    function exportJSON(){
+      const payload = {timestamp:new Date().toISOString(), answers:[], score:SCORE};
+      document.querySelectorAll('input[type="radio"]').forEach(el=>{
+        if(el.checked){
+          payload.answers.push({name:el.name, value:el.value, type:el.dataset.type, group:el.dataset.group});
+        }
+      });
+      const blob = new Blob([JSON.stringify(payload,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download='riasec_fragebogen.json'; a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetAll(){
+      document.querySelectorAll('input[type="radio"]').forEach(el=>{el.checked=false});
+      updateScore(); updateTimeEstimate();
+    }
+
+    // render & init
+    renderActivities();
+    renderSkills();
+    renderJobs();
+    document.addEventListener('change', e=>{ if(e.target.matches('input[type="radio"]')) updateScore(); });
+    // Buttons werden erst nach Rendern sichtbar sein
+    document.addEventListener('click', e=>{
+      if(e.target && e.target.id==='exportBtn') exportJSON();
+      if(e.target && e.target.id==='resetBtn'){ resetAll(); window.scrollTo({top:0, behavior:'smooth'}); }
+      if(e.target && e.target.id==='showResults'){
+        // Auswertung anzeigen
+        document.getElementById('scorePanel').classList.remove('hidden');
+        updateScore();
+        document.getElementById('scorePanel').scrollIntoView({behavior:'smooth'});
+      }
+    });
+    updateScore();
+  </script>
+</body>
+</html>
